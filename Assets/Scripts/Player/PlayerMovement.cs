@@ -7,19 +7,27 @@ namespace Game.Player
     public class PlayerMovement : MonoBehaviour
     {
         [SerializeField] private float moveSpeed = 5f;
+        [SerializeField] private VirtualJoystick joystick;
 
         private Rigidbody2D _rb;
-        private IInputSource _input;
+        private IInputSource _keyboard;
+        private IInputSource _joystickInput;
 
         private void Awake()
         {
             _rb = GetComponent<Rigidbody2D>();
-            _input = new KeyboardInputSource();
+            _keyboard = new KeyboardInputSource();
+            _joystickInput = joystick != null ? new JoystickInputSource(joystick) : null;
         }
 
         private void FixedUpdate()
         {
-            Vector2 dir = _input.ReadDirection();
+            Vector2 dir = _keyboard.ReadDirection();
+            if (dir.sqrMagnitude < 0.01f && _joystickInput != null)
+            {
+                dir = _joystickInput.ReadDirection();
+            }
+
             _rb.linearVelocity = dir * moveSpeed;
         }
     }
